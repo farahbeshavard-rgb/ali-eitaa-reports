@@ -8,18 +8,16 @@
   <style>
     body{font-family:sans-serif;text-align:center;padding:32px 16px;line-height:1.8}
     .box{max-width:520px;margin:20px auto;padding:18px;border:1px solid #ddd;border-radius:12px}
-    .id{font-size:24px;font-weight:700;direction:ltr}
-    .note{font-size:13px}
+    .ok{font-weight:700}.note{font-size:13px}
   </style>
 </head>
 <body>
   <h2>سامانه گزارش‌های علی</h2>
-  <p id="status">در حال بررسی اتصال به ایتا...</p>
+  <p id="status">در حال بررسی اتصال امن به ایتا...</p>
   <div id="result" class="box" hidden>
-    <div>شناسه کاربر فعلی ایتا:</div>
-    <div id="uid" class="id"></div>
-    <div id="name"></div>
-    <p class="note">این صفحه فقط برای تست اتصال است و هیچ توکن API، اطلاعات اکسل یا اطلاعات مالی در آن ذخیره نشده است.</p>
+    <div id="name" class="ok"></div>
+    <p>اتصال اولیه برنامه برقرار است.</p>
+    <p class="note">برای حفظ حریم خصوصی، شناسه داخلی کاربر روی صفحه نمایش داده نمی‌شود. هیچ توکن API، اطلاعات اکسل یا اطلاعات مالی در این صفحه ذخیره نشده است.</p>
   </div>
   <script>
     (function(){
@@ -29,9 +27,8 @@
       if(!wa){status.textContent='این صفحه باید از داخل برنامه ایتا باز شود.';return;}
       try{if(typeof wa.ready==='function')wa.ready();if(typeof wa.expand==='function')wa.expand();}catch(e){}
       const user=wa.initDataUnsafe&&wa.initDataUnsafe.user;
-      if(!user||user.id==null){status.textContent='اتصال به ایتا برقرار است، اما شناسه کاربر در این اجرا دریافت نشد.';return;}
+      if(!user){status.textContent='اتصال به ایتا برقرار است، اما اطلاعات کاربر در این اجرا دریافت نشد.';return;}
       status.textContent='اتصال به ایتا برقرار شد.';
-      document.getElementById('uid').textContent=String(user.id);
       document.getElementById('name').textContent=[user.first_name||'',user.last_name||''].join(' ').trim();
       result.hidden=false;
     })();
