@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>گزارش علی</title>
   <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+  <!-- Set this non-secret URL only after the backend is deployed. -->
+  <meta name="ali-api-base" content="">
   <style>
     body{font-family:sans-serif;text-align:center;padding:32px 16px;line-height:1.8}
     .box{max-width:520px;margin:20px auto;padding:18px;border:1px solid #ddd;border-radius:12px}
-    .ok{font-weight:700}.note{font-size:13px}
+    .ok{font-weight:700}.note{font-size:13px}button{padding:10px 18px;border:0;border-radius:8px;cursor:pointer}
   </style>
 </head>
 <body>
@@ -17,12 +19,16 @@
   <div id="result" class="box" hidden>
     <div id="name" class="ok"></div>
     <p>اتصال اولیه برنامه برقرار است.</p>
+    <button id="onboard" hidden>تأیید اتصال امن</button>
+    <p id="onboard-status" class="note"></p>
     <p class="note">برای حفظ حریم خصوصی، شناسه داخلی کاربر روی صفحه نمایش داده نمی‌شود. هیچ توکن API، اطلاعات اکسل یا اطلاعات مالی در این صفحه ذخیره نشده است.</p>
   </div>
   <script>
     (function(){
       const status=document.getElementById('status');
       const result=document.getElementById('result');
+      const onboard=document.getElementById('onboard');
+      const onboardStatus=document.getElementById('onboard-status');
       const wa=window.Eitaa&&window.Eitaa.WebApp;
       if(!wa){status.textContent='این صفحه باید از داخل برنامه ایتا باز شود.';return;}
       try{if(typeof wa.ready==='function')wa.ready();if(typeof wa.expand==='function')wa.expand();}catch(e){}
@@ -31,6 +37,32 @@
       status.textContent='اتصال به ایتا برقرار شد.';
       document.getElementById('name').textContent=[user.first_name||'',user.last_name||''].join(' ').trim();
       result.hidden=false;
+      const apiBase=document.querySelector('meta[name="ali-api-base"]').content.replace(/\/$/,'');
+      const unsafeStart=wa.initDataUnsafe&&wa.initDataUnsafe.start_param;
+      const urlStart=new URLSearchParams(location.search).get('tgWebAppStartParam');
+      const nonce=unsafeStart||urlStart||'';
+      if(!apiBase){onboardStatus.textContent='سامانه امن هنوز فعال نشده است.';return;}
+      if(!nonce){onboardStatus.textContent='این صفحه باید از لینک اختصاصی اتصال باز شود.';return;}
+      onboard.hidden=false;
+      onboard.addEventListener('click',function(){
+        onboard.disabled=true;
+        const submit=function(){
+          fetch(apiBase+'/v1/onboarding/complete',{
+            method:'POST',headers:{'content-type':'application/json'},
+            body:JSON.stringify({nonce:nonce,init_data:wa.initData})
+          }).then(function(r){return r.json().then(function(x){return {status:r.status,data:x};});})
+            .then(function(x){
+              if(x.status>=200&&x.status<300&&x.data.ok){
+                onboardStatus.textContent='هویت ایتایی شما با موفقیت بررسی شد. ارسال پیام هنوز فعال نشده است.';
+                onboard.hidden=true;
+              }else{throw new Error('blocked');}
+            }).catch(function(){onboardStatus.textContent='اتصال تأیید نشد. لطفاً از لینک جدید استفاده کنید.';onboard.disabled=false;});
+        };
+        if(user.allows_write_to_pm){submit();return;}
+        if(typeof wa.requestWriteAccess==='function'){
+          wa.requestWriteAccess(function(granted){if(granted){submit();}else{onboardStatus.textContent='اجازه ارسال داده نشد.';onboard.disabled=false;}});
+        }else{onboardStatus.textContent='نسخه ایتا امکان درخواست اجازه را ارائه نمی‌کند.';onboard.disabled=false;}
+      });
     })();
   </script>
 </body>

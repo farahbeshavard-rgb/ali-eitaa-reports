@@ -1,0 +1,21 @@
+name = "ali-eitaa-reports-api"
+main = "backend/src/index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+ENVIRONMENT = "production"
+SEND_ENABLED = "false"
+AUTHORIZED_SENDER_REF = "Ali"
+ALLOWED_ORIGIN = "https://farahbeshavard-rgb.github.io"
+
+# Add the production database after creating it in the Product Owner's account.
+# Never commit a real database_id or secret.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "ali-eitaa-reports"
+# database_id = "SET_IN_DEPLOYMENT_CONFIGURATION"
+
+# Required encrypted secrets, entered directly by the Product Owner/provider:
+# EITAA_APP_TOKEN        (must be rotated before first send)
+# OPERATOR_API_KEY       (strong random value)
+# APP_PUBLIC_USERNAME    (non-secret but deployment-specific)
