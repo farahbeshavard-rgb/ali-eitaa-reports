@@ -3,4 +3,6 @@
 *.pem
 *.key
 secrets/
+.wrangler/
+wrangler.production.toml
 .DS_Store
